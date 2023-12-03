@@ -22,6 +22,10 @@ class Reveal {
     );
   }
 
+  int get power {
+    return red * blue * green;
+  }
+
   @override
   String toString() {
     return 'Reveal{red: $red, blue: $blue, green: $green}';
@@ -75,6 +79,16 @@ class Day2 {
     print("Day 2 Part 1");
     print(possibleGames
         .map((game) => game.id)
+        .reduce((value, element) => value + element));
+  }
+
+  static Future<void> partTwo() async {
+    final input = await readLines('lib/day_2/input.txt');
+    final games = input.map((line) => Game.fromString(line)).toList();
+    print("Day 2 Part 2");
+    print(games
+        .toList()
+        .map((game) => game.maxReveal.power)
         .reduce((value, element) => value + element));
   }
 }
