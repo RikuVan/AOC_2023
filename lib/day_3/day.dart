@@ -105,20 +105,24 @@ class Day3 {
     return elements;
   }
 
-  static List<List<Element>> _windowIntoPairsAndFlatten(
-      List<List<Element>> list) {
-    List<List<Element>> flattenedPairs = [];
+  static List<List<List<Element>>> _windowIntoPairs(List<List<Element>> list) {
+    List<List<List<Element>>> windowedPairs = [];
 
     for (int i = 0; i < list.length - 1; i++) {
-      flattenedPairs.add([...list[i], ...list[i + 1]]);
+      windowedPairs.add([list[i], list[i + 1]]);
     }
 
-    return flattenedPairs;
+    return windowedPairs;
+  }
+
+  static List<Element> _flatten(List<List<Element>> nestedList) {
+    return nestedList.expand((sublist) => sublist).toList();
   }
 
   static Set<Number> _findParts(List<List<Element>> schematic) {
     final parts = <Number>{};
-    _windowIntoPairsAndFlatten(schematic).forEach((flattenedRows) {
+    _windowIntoPairs(schematic).forEach((rows) {
+      final flattenedRows = _flatten(rows);
       final numbers = flattenedRows.whereType<Number>();
       final symbols = flattenedRows.whereType<Symbol>();
       return numbers
@@ -128,6 +132,22 @@ class Day3 {
       });
     });
     return parts;
+  }
+
+  static List<List<int>> findGearParts(List<Element> elements) {
+    final numbers = elements.whereType<Number>();
+    final potentialGears =
+        elements.whereType<Symbol>().where((s) => s.value == '*');
+    return potentialGears
+        .map((s) {
+          return numbers
+              .where((n) =>
+                  n.expandedColumn.contains(s.x) && n.expandedRow.contains(s.y))
+              .toList();
+        })
+        .where((maybeGear) => maybeGear.length == 2)
+        .map((gear) => gear.map((n) => n.value).toList())
+        .toList();
   }
 
   static Future<void> partOne() async {
@@ -140,6 +160,21 @@ class Day3 {
     final parts = _findParts(rows.toList());
     final result = parts.map((e) => e.value).reduce((x, y) => x + y);
     print("Day 3 Part 1");
+    print(result);
+  }
+
+  static Future<void> partTwo() async {
+    final input = await readLines('lib/day_3/input.txt');
+    final rows = input.asMap().entries.map((entry) {
+      List<String> line = entry.value.split("");
+      int index = entry.key;
+      return _extractElements(line, index);
+    });
+    final gears = findGearParts(_flatten(rows.toList()));
+    final result = gears
+        .map((gear) => gear.reduce((x, y) => x * y))
+        .reduce((x, y) => x + y);
+    print("Day 3 Part 2");
     print(result);
   }
 }
