@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:aoc_2023/common/day.dart';
+import 'package:aoc_2023/common/list_extensions.dart';
 import 'package:aoc_2023/common/read_lines.dart';
 import 'package:equatable/equatable.dart';
 
@@ -65,12 +67,16 @@ class Symbol extends Element {
   List<Object?> get props => [value, x, y];
 }
 
-class Day3 {
-  final schematic = <Element>[];
-  static bool _isNotDot(String ch) => ch != '.';
-  static bool _isNumber(String ch) => RegExp(r'\d').hasMatch(ch);
+class Day3 with Day {
+  @override
+  final dayNumber = 3;
 
-  static List<Element> _extractElements(List<String> line, int y) {
+  final schematic = <Element>[];
+
+  bool _isNotDot(String ch) => ch != '.';
+  bool _isNumber(String ch) => RegExp(r'\d').hasMatch(ch);
+
+  List<Element> _extractElements(List<String> line, int y) {
     final elements = <Element>[];
     StringBuffer currentNumber = StringBuffer();
     int start = -1;
@@ -105,7 +111,7 @@ class Day3 {
     return elements;
   }
 
-  static List<List<List<Element>>> _windowIntoPairs(List<List<Element>> list) {
+  List<List<List<Element>>> _windowIntoPairs(List<List<Element>> list) {
     List<List<List<Element>>> windowedPairs = [];
 
     for (int i = 0; i < list.length - 1; i++) {
@@ -115,14 +121,10 @@ class Day3 {
     return windowedPairs;
   }
 
-  static List<Element> _flatten(List<List<Element>> nestedList) {
-    return nestedList.expand((sublist) => sublist).toList();
-  }
-
-  static Set<Number> _findParts(List<List<Element>> schematic) {
+  Set<Number> _findParts(List<List<Element>> schematic) {
     final parts = <Number>{};
     _windowIntoPairs(schematic).forEach((rows) {
-      final flattenedRows = _flatten(rows);
+      final flattenedRows = rows.flatten();
       final numbers = flattenedRows.whereType<Number>();
       final symbols = flattenedRows.whereType<Symbol>();
       return numbers
@@ -134,7 +136,7 @@ class Day3 {
     return parts;
   }
 
-  static List<List<int>> findGearParts(List<Element> elements) {
+  List<List<int>> findGearParts(List<Element> elements) {
     final numbers = elements.whereType<Number>();
     final potentialGears =
         elements.whereType<Symbol>().where((s) => s.value == '*');
@@ -150,7 +152,7 @@ class Day3 {
         .toList();
   }
 
-  static Future<void> partOne() async {
+  Future<void> partOne() async {
     final input = await readLines('lib/day_3/input.txt');
     final rows = input.asMap().entries.map((entry) {
       List<String> line = entry.value.split("");
@@ -158,23 +160,19 @@ class Day3 {
       return _extractElements(line, index);
     });
     final parts = _findParts(rows.toList());
-    final result = parts.map((e) => e.value).reduce((x, y) => x + y);
-    print("Day 3 Part 1");
-    print(result);
+    final result = parts.map((e) => e.value).sum();
+    printResultForPart(part: 1, result: result);
   }
 
-  static Future<void> partTwo() async {
+  Future<void> partTwo() async {
     final input = await readLines('lib/day_3/input.txt');
     final rows = input.asMap().entries.map((entry) {
       List<String> line = entry.value.split("");
       int index = entry.key;
       return _extractElements(line, index);
     });
-    final gears = findGearParts(_flatten(rows.toList()));
-    final result = gears
-        .map((gear) => gear.reduce((x, y) => x * y))
-        .reduce((x, y) => x + y);
-    print("Day 3 Part 2");
-    print(result);
+    final gears = findGearParts(rows.flatten());
+    final result = gears.map((gear) => gear.reduce((x, y) => x * y)).sum();
+    printResultForPart(part: 2, result: result);
   }
 }

@@ -1,3 +1,4 @@
+import 'package:aoc_2023/common/day.dart';
 import 'package:aoc_2023/common/read_lines.dart';
 
 const numberNameMap = {
@@ -12,10 +13,15 @@ const numberNameMap = {
   'nine': 9
 };
 
-class Day1 {
-  static bool isNumber(String char) => char.contains(RegExp(r'\d'));
+class Day1 with Day {
+  Day1();
 
-  static int sumFromCombinedFirstAndLastDigits(List<String> lines) {
+  @override
+  final dayNumber = 1;
+
+  bool isNumber(String char) => char.contains(RegExp(r'\d'));
+
+  int sumFromCombinedFirstAndLastDigits(List<String> lines) {
     int total = 0;
     for (final line in lines) {
       var digits = line.split('').where(isNumber).toList();
@@ -33,7 +39,7 @@ class Day1 {
     return total;
   }
 
-  static List<String> replacesNamesWithDigits(List<String> lines) {
+  List<String> replacesNamesWithDigits(List<String> lines) {
     List<String> newLines = [];
     for (final line in lines) {
       StringBuffer newLine = StringBuffer();
@@ -56,20 +62,18 @@ class Day1 {
     return newLines;
   }
 
-  static Future<void> partOne() async {
+  Future<void> partOne() async {
     final lines = await readLines('lib/day_1/input.txt');
     final total = sumFromCombinedFirstAndLastDigits(lines);
 
-    print('Day 1 part 1');
-    print(total);
+    printResultForPart(part: 1, result: total);
   }
 
-  static Future<void> partTwo() async {
+  Future<void> partTwo() async {
     final lines = await readLines('lib/day_1/input.txt');
     final linesWithReplacedNames = replacesNamesWithDigits(lines);
     final total = sumFromCombinedFirstAndLastDigits(linesWithReplacedNames);
 
-    print('Day 1 part 2');
-    print(total);
+    printResultForPart(part: 2, result: total);
   }
 }

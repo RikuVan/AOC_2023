@@ -1,3 +1,5 @@
+import 'package:aoc_2023/common/day.dart';
+import 'package:aoc_2023/common/list_extensions.dart';
 import 'package:aoc_2023/common/read_lines.dart';
 
 class Reveal {
@@ -70,25 +72,26 @@ class Game {
   }
 }
 
-class Day2 {
-  static Future<void> partOne() async {
+class Day2 with Day {
+  @override
+  final dayNumber = 2;
+
+  Future<void> partOne() async {
     final testGame = Reveal(blue: 14, green: 13, red: 12);
     final input = await readLines('lib/day_2/input.txt');
     final games = input.map((line) => Game.fromString(line)).toList();
     final possibleGames = games.where((game) => game.isPossible(testGame));
-    print("Day 2 Part 1");
-    print(possibleGames
-        .map((game) => game.id)
-        .reduce((value, element) => value + element));
+
+    printResultForPart(
+        part: 1, result: possibleGames.map((game) => game.id).sum());
   }
 
-  static Future<void> partTwo() async {
+  Future<void> partTwo() async {
     final input = await readLines('lib/day_2/input.txt');
     final games = input.map((line) => Game.fromString(line)).toList();
-    print("Day 2 Part 2");
-    print(games
-        .toList()
-        .map((game) => game.maxReveal.power)
-        .reduce((value, element) => value + element));
+
+    printResultForPart(
+        part: 2,
+        result: games.toList().map((game) => game.maxReveal.power).sum());
   }
 }
