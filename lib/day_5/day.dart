@@ -1,6 +1,9 @@
+import 'dart:isolate';
+
 import 'package:aoc_2023/common/day.dart';
 import 'package:aoc_2023/common/index.dart';
 import 'package:aoc_2023/common/read_lines.dart';
+import 'dart:math' as math;
 
 typedef Almanac = Map<String, List<Mapper>>;
 
@@ -38,17 +41,21 @@ class Day5 with Day {
     return almanac;
   }
 
-  List<int> parseSeeds(String line) {
+  Set<int> parseSeeds(String line) {
     return line
         .split(':')
         .last
         .split(' ')
         .whereNot(isBlank)
         .map(int.parse)
-        .toList();
+        .toSet();
   }
 
-  int findLowestLocation(List<int> seeds, Almanac almanac) {
+  Iterable<int> getSeedRanges(Iterable<int> seeds) {
+    return seeds.iterator.asLazyRanges();
+  }
+
+  int findLowestLocation(Iterable<int> seeds, Almanac almanac) {
     int lowestLocation = 0x7FFFFFFFFFFFFFFF;
     return seeds.fold(lowestLocation, (previousValue, element) {
       int location = convertThroughCategories(element, almanac);
@@ -57,6 +64,18 @@ class Day5 with Day {
       }
       return previousValue;
     });
+  }
+
+  int findLowestLocation2(List<int> seeds, Almanac almanac) {
+    int lowestLocation = 0x7FFFFFFFFFFFFFFF;
+    final seedRanges = getSeedRanges(seeds);
+    seedRanges.forEach((element) {
+      int location = convertThroughCategories(element, almanac);
+      if (location < lowestLocation) {
+        lowestLocation = location;
+      }
+    });
+    return lowestLocation;
   }
 
   int convertThroughCategories(int number, Almanac almanac) {
@@ -80,6 +99,22 @@ class Day5 with Day {
     return number;
   }
 
+  void _findLowestLocationIsolate(List<dynamic> arguments) {
+    List<int> seeds = arguments[0];
+    Almanac almanac = arguments[1];
+    SendPort sendPort = arguments[2];
+
+    int result = findLowestLocation2(seeds, almanac);
+    sendPort.send(result);
+  }
+
+  Future<int> processChunks(List<int> seedsChunk, Almanac almanac) async {
+    ReceivePort receivePort = ReceivePort();
+    await Isolate.spawn(_findLowestLocationIsolate,
+        [seedsChunk, almanac, receivePort.sendPort]);
+    return await receivePort.first as int;
+  }
+
   Future<void> partOne() async {
     final input = await readLines('lib/day_5/input.txt');
     final seeds = parseSeeds(input.first);
@@ -87,6 +122,24 @@ class Day5 with Day {
     final result = findLowestLocation(seeds, almanac);
     printResultForPart(part: 1, result: result);
     // 1181555926
+  }
+
+  // this is ridiculously slow, but it works eventually...
+  // probably should flip the search around look for the location to speed things up
+  Future<void> partTwo() async {
+    final input = await readLines('lib/day_5/input.txt');
+    final almanac = parseAlmanac(input.skip(1));
+    final seeds = parseSeeds(input.first);
+
+    List<Future<int>> futures = [];
+
+    for (var sublist in partition(seeds, seeds.length ~/ 2)) {
+      futures.add(processChunks(sublist, almanac));
+    }
+
+    List<int> results = await Future.wait(futures);
+    int? result = results.reduce(math.min);
+    printResultForPart(part: 2, result: result);
   }
 }
 
@@ -106,5 +159,21 @@ class Mapper {
 
   int map(int number) {
     return destStart + (number - sourceStart);
+  }
+}
+
+extension on Iterator<int> {
+  Iterable<int> asLazyRanges() sync* {
+    while (moveNext()) {
+      final start = current;
+      if (!moveNext()) {
+        throw FormatException("Seed ranges should be in pairs");
+      }
+      final count = current;
+
+      for (int i = 0; i < count; i++) {
+        yield start + i;
+      }
+    }
   }
 }
