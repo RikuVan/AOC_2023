@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:aoc_2023/common/day.dart';
-import 'package:aoc_2023/common/list_extensions.dart';
+import 'package:aoc_2023/common/iterable_extensions.dart';
 import 'package:aoc_2023/common/read_lines.dart';
 import 'package:equatable/equatable.dart';
 

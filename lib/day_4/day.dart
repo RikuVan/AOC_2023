@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:aoc_2023/common/day.dart';
-import 'package:aoc_2023/common/list_extensions.dart';
+import 'package:aoc_2023/common/iterable_extensions.dart';
 import 'package:aoc_2023/common/read_lines.dart';
 
 // 25571
