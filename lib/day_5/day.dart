@@ -50,13 +50,13 @@ class Day5 with Day {
 
   int findLowestLocation(List<int> seeds, Almanac almanac) {
     int lowestLocation = 0x7FFFFFFFFFFFFFFF;
-    for (int seed in seeds) {
-      int location = convertThroughCategories(seed, almanac);
-      if (location < lowestLocation) {
-        lowestLocation = location;
+    return seeds.fold(lowestLocation, (previousValue, element) {
+      int location = convertThroughCategories(element, almanac);
+      if (location < previousValue) {
+        return location;
       }
-    }
-    return lowestLocation;
+      return previousValue;
+    });
   }
 
   int convertThroughCategories(int number, Almanac almanac) {
@@ -71,8 +71,8 @@ class Day5 with Day {
     return number;
   }
 
-  int convertNumber(int number, List<Mapper> map) {
-    for (Mapper mapper in map) {
+  int convertNumber(int number, List<Mapper> mappers) {
+    for (Mapper mapper in mappers) {
       if (mapper.inRange(number)) {
         return mapper.map(number);
       }
@@ -86,6 +86,7 @@ class Day5 with Day {
     final almanac = parseAlmanac(input.skip(1));
     final result = findLowestLocation(seeds, almanac);
     printResultForPart(part: 1, result: result);
+    // 1181555926
   }
 }
 
