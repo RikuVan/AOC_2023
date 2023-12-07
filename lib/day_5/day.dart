@@ -126,7 +126,7 @@ class Day5 with Day {
 
   // this is ridiculously slow, but it works eventually...
   // probably should flip the search around look for the location to speed things up
-  Future<void> partTwo() async {
+  Future<void> _partTwo() async {
     final input = await readLines('lib/day_5/input.txt');
     final almanac = parseAlmanac(input.skip(1));
     final seeds = parseSeeds(input.first);
@@ -140,6 +140,11 @@ class Day5 with Day {
     List<int> results = await Future.wait(futures);
     int? result = results.reduce(math.min);
     printResultForPart(part: 2, result: result);
+  }
+
+  Future<void> partTwo() async {
+    final input = await readLines('lib/day_5/input.txt');
+    printResultForPart(part: 2, result: 'real one wakes forever');
   }
 }
 
