@@ -12,4 +12,5 @@ Future<void> main() async {
   await Day5().partOne();
   await Day5().partTwo();
   await Day6().partOne();
+  await Day6().partTwo();
 }
